@@ -20,7 +20,7 @@ These files reproduce various panels of the respective Figure X in [1]. Most Fig
 
 ## Installation guide
 (Tested on Windows 11 Home, Windows 11 Home, Intel(R) Core(TM) i7-8550U CPU, 16 GB RAM, Python and PyCharm installed. The estimated run time for producing a Figure panels or a Movie snapshots as in [1]: 1 second - 3 hours, depending on a particular task.)
-1) Install 
+1) Install Python (https://www.python.org/) and PyCharm (https://www.jetbrains.com/pycharm/).
 2) Download this project and save it into a folder.
 3) Open this folder with PyCharm.
 
