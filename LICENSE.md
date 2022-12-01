@@ -1,6 +1,6 @@
 Copyright (C) 2022 Vit Piskovsky
 
-The author does not claim any responsibility for proper functioning of this project and the behaviour of the code. Please notice, that some commands might be specific to an operation system, a processor architecture, etc.
+The author does not claim any responsibility for proper functioning of this project and the behaviour of the code. Please notice, that some commands might be specific to an operating system, a processor architecture, etc.
 
 # License
 
