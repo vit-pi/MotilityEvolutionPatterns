@@ -30,6 +30,6 @@ These files reproduce various panels of the respective Figure X in [1]. Most Fig
 3) Run the file.
 4) Output file(s) appear in the Figures/Sketches folder (resp. Movies folder).
 
-# References:
+# References
 [1] V. Piskovsky, unpublished
 
