@@ -4,10 +4,12 @@ This project provides the code to explore how the evolution of dispersal limits 
 ## Code structure
 ### Pattern.py
 This file contains the lower level objects and functions that are called by the rest of the files. Objects EnvProp and SpecProp store the information about the information of the environment where the studied organisms move (EnvProp) and about the properties of these organisms (SpecProp). The IntFit objects carry the information about fitness functions of each organism (see [1]) and are passed as an attribute to the EnvProp object. The EnvProp and SpecProp object are passed to the Pattern object (the main object), that holds the information about spatial distribution of organisms of all diffusivities at a particular time. This object contains methods to (1) transform between data structures that describe this distribution, (2) find the properties of this distribution, and (3) update this distribution in time.  The important update functions are:
+
 1) update_pattern_euler(): used to update the distribution and time $t \to t + \Delta t$,
 2) mutation_update(): used before every time-step of the Euler method above if mutatants of variable diffusivity are to be introduced into the population,
 3) fitness_update(): used before every time-step of the Euler method and before mutation_update() to keep track of the total fitness of each organism,
 4) fitness_update(): used before every time-step of the Euler method and before mutation_update() to keep track of the expected diffusivity of each organism.
+
 To initialize the Pattern object, the initial pattern is required in addition to EnvProp and SpecProp objects. This can be achieved with the init_pattern function. To make a desired plot of the current state of the Pattern object, the plotting functions are used.
 
 ### Movie.py
