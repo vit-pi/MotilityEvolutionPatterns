@@ -30,6 +30,12 @@ These files reproduce various panels of the respective Figure X in [1]. Most Fig
 3) Run the file.
 4) Output file(s) appear in the Figures/Sketches folder (resp. Movies folder).
 
+## Demo
+1) Open Fig1_DiffPlane.py.
+2) No parameters need to be modified in this case.
+3) Run the file.
+4) Open the folder "Figure/Sketches" to find the new file Fig1_DiffPlane.svg.
+
 # References
 [1] V. Piskovsky, unpublished
 
