@@ -12,8 +12,9 @@ import datetime
 # PARAMETERS
 ###
 # External: By varying the truth values of the two parameters, all supplementary movies are reproduced
-distant_mutations = True
+distant_mutations = False
 eco_forcing = True
+init_homog = False
 
 # Internal
 if eco_forcing:
@@ -24,17 +25,23 @@ else:
     filename = "CoopDef_"
 if distant_mutations:
     t_max = 1110
-    plot_step = 5
+    plot_step = 10
     title += "Long-range Mutations\n"
     filename += "LongMut_"
 else:
-    t_max = 3110
+    t_max = 4710#3110
     plot_step = 10
     title += "Short-range Mutations\n"
     filename += "ShortMut_"
 seed = 0
-d0 = 0.1
-d1 = 1
+if init_homog:
+    t_max = 2010
+    d0 = 1
+    d1 = 0.1
+    filename += "InitHomog_"
+else:
+    d0 = 0.1
+    d1 = 1
 white_time = 10
 
 ###
@@ -57,15 +64,15 @@ if eco_forcing:
         ax_fitness.set_ylim(-10, 5)
         ax_fitness.set_yticks([-10, -5, 0, 5])
     else:
-        ax_fitness.set_ylim(-60, 30)
-        ax_fitness.set_yticks([-60, -30, 0, 30])
+        ax_fitness.set_ylim(-60, 60)
+        ax_fitness.set_yticks([-60, -30, 0, 30, 60])
 else:
     if distant_mutations:
         ax_fitness.set_ylim(-3, 1)
         ax_fitness.set_yticks([-3, -2, -1, 0, 1])
     else:
-        ax_fitness.set_ylim(-15, 5)
-        ax_fitness.set_yticks([-15, -10, -5, 0, 5])
+        ax_fitness.set_ylim(-20, 5)
+        ax_fitness.set_yticks([-20, -15, -10, -5, 0, 5])
 sub_gs = gs[0, 1].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), wspace=0.05, hspace=0.05)
 ax_diffplane = fig.add_subplot(sub_gs[1, 0])
 ax_diffplane.set_xlabel("diffusivity $D_A$", labelpad=-8, color=colors[0])
@@ -80,9 +87,12 @@ ax_diffred = fig.add_subplot(sub_gs[1, 1], sharey=ax_diffplane)
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
+    env_prop.pos_num = 101
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
+    env_prop.pos_num = 121
 env_prop.distant_mutations = distant_mutations
+env_prop.initialize()
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 pattern = pt.Pattern(env_prop, spec_prop, pt.init_pattern(env_prop, spec_prop, 1, seed, 1, d0, d1))
 # Prepare folder

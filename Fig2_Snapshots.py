@@ -13,7 +13,7 @@ import Pattern as pt
 # PARAMETERS
 ###
 # External: By varying the truth value, Fig. 2 (true) and its SI complement (false) are reproduced
-eco_forcing = False
+eco_forcing = True
 
 # Internal
 distant_mutations = False
@@ -25,7 +25,7 @@ if eco_forcing:
     else:
         filename = "PreyPred_ShortMut"
         t_max = 1700
-        plot_times = [100, 300, 700, 1600]
+        plot_times = [100, 300, 700, 1100]
 else:
     if distant_mutations:
         filename = "CoopDef_LongMut"
@@ -34,7 +34,7 @@ else:
     else:
         filename = "CoopDef_ShortMut"
         t_max = 1700
-        plot_times = [100, 400, 800, 1600]
+        plot_times = [100, 300, 800, 1250]
 seed = 0
 d0 = 0.1
 d1 = 1
@@ -78,11 +78,14 @@ ax_blue[0].set_ylabel("diffusivity $D_A$", fontsize=12)
 # Create a pattern object
 env_prop = pt.EnvProp()
 if eco_forcing:
-    env_prop.int_fitness = pt.IntFit1(2, 0.62, 0.5)
+    env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
+    env_prop.pos_num = 101
 else:
-    env_prop.int_fitness = pt.IntFit2(2.4, 8, 1, 1.2)
+    env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
+    env_prop.pos_num = 121
 env_prop.distant_mutations = distant_mutations
 env_prop.fitness_memory_time = t_max
+env_prop.initialize()
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 for spec in range(2):
     spec_prop[spec].diff_num = 11
@@ -105,7 +108,10 @@ pattern.time = np.floor(pattern.time)
 # Plot fitness
 pt.plot_fitness(pattern, 0, ax_fitness, True, False)
 # Plot color bars
-labels = ["activator $N_A$", "inhibitor $N_I$"]
+if eco_forcing:
+    labels = ["prey $N_A$", "predators $N_I$"]
+else:
+    labels = ["cooperators $N_A$", "defectors $N_I$"]
 for spec in range(2):
     vmin, vmax = im[spec].get_clim()
     plt.colorbar(im[spec], cax=ax_colorbars[spec], ticks=[0, vmax])

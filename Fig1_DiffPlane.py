@@ -11,7 +11,7 @@ import Pattern as pt
 ###
 # Create objects
 env_prop = pt.EnvProp()
-env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)#pt.IntFit1(2,0.62,0.5)
+env_prop.int_fitness = pt.IntFit1(2,0.62,0.5) #pt.IntFit2(2.4,8,1,1.2)
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 spec_prop[0].diff_max = 1
 spec_prop[1].diff_max = 1

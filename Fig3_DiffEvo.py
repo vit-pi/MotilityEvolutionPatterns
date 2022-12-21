@@ -10,17 +10,17 @@ import Pattern as pt
 # PARAMETERS
 ###
 # External: By varying the truth value, Fig. 3a (true) and its SI complement (false) are reproduced
-eco_forcing = False
+eco_forcing = True
 
 # Internal
 if eco_forcing:
     filename = "DiffEvo_PreyPred"
-    t_max = 2300
-    plot_times = [100, 300, 700, 1600]
+    t_max = 1800
+    plot_times = [100, 300, 700, 1100]
 else:
     filename = "DiffEvo_CoopDef"
-    t_max = 2300
-    plot_times = [100, 400, 800, 1600]
+    t_max = 1800
+    plot_times = [100, 300, 800, 1250]
 seed = 0
 d0 = 0.1
 d1 = 1
@@ -38,9 +38,12 @@ ax = fig.add_subplot(gs[:, :])
 # Create a pattern object
 env_prop = pt.EnvProp()
 if eco_forcing:
-    env_prop.int_fitness = pt.IntFit1(2, 0.62, 0.5)
+    env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
+    env_prop.pos_num = 101
 else:
-    env_prop.int_fitness = pt.IntFit2(2.4, 8, 1, 1.2)
+    env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
+    env_prop.pos_num = 121
+env_prop.initialize()
 env_prop.diff_memory_time = t_max
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 for spec in range(2):
@@ -64,7 +67,7 @@ while pattern.time < t_max:
     pattern.update_pattern_euler()
 pattern.time = np.floor(pattern.time)
 # Plot expected diffusivity
-pt.plot_expected_diffusivity(pattern, plot_times, ax, True)
+pt.plot_expected_diffusivity(pattern, plot_times, ax, True, True)
 # Plot
 fig.savefig("Figures/Sketches/Fig3_"+filename+".svg")
 plt.show()

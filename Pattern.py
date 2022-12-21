@@ -20,10 +20,13 @@ class SpecProp:
         self.diff_num = 11
         self.diff_step = 0
         self.diff_discrete = True
-        self.mut_rate = 5e-3
+        self.mut_rate = 1/150
+        self.mut_size = 1e-4
+        self.survival_threshold = 5e-5
         self.initialize()
 
     def initialize(self):
+        self.survival_threshold = self.mut_size/2
         if self.diff_min == self.diff_max:
             self.diff_num = 1
             self.diff_step = 1
@@ -35,11 +38,11 @@ class SpecProp:
 class EnvProp:
     def __init__(self):
         self.pos_max = 100
-        self.pos_num = 100
+        self.pos_num = 121
         self.time_step = 1e-1
         self.int_fitness = IntFit1(2,0.62,0.5) #IntFit2(2.4,8,1,1.2) #IntFit1(2,0.62,0.5)
         self.pos_step = 0
-        self.mut_size = 1e-2/self.pos_num
+        self.pert_size = 1e-4
         self.distant_mutations = False    # True = mutations into all strategies, False=mutations only to nearest neighbours
         self.fitness_memory_time = 50
         self.diff_memory_time = 50
@@ -433,40 +436,43 @@ class Pattern:
 
     # update mutations
     def mutation_update(self):
-        if self.time > self.next_mut_time or self.time == 0:
-            # iterate through diffusion strategies - kill those below survival threshold, update those above the threshold
-            # introduce homogeneous perturbation if long range mutations possible
+        # kill strategies that are lost, abundance below survival_threshold*pos_max
+        if self.time == 0 or self.time > self.next_mut_time:
+            spec = self.next_mut_spec
+            #for spec in range(2):
+            for diff in range(self.spec_prop[spec].diff_num):
+                i = spec * self.spec_prop[0].diff_num + diff
+                if self.find_n_diff_tot(diff, spec) <= self.spec_prop[spec].survival_threshold * self.env_prop.pos_max:
+                    for pos in range(self.env_prop.pos_num):
+                        self.n[i * self.env_prop.pos_num + pos] = 0
+                    self.active[i] = False
+        # introduce mutations
+        if self.time > self.next_mut_time:
+            # introduce short-range mutations of a given species if there is a neigbouring active strategy
             if self.env_prop.distant_mutations:
-                if self.time > 0:
-                    for i in range(self.n.size):
-                        if self.n[i] <= self.env_prop.mut_size / 2:
-                            self.n[i] = self.env_prop.mut_size * np.random.rand()
-                        else:
-                            self.n[i] = self.n[i] * (1 + self.env_prop.mut_size * np.random.rand())
-            # introduce nearest-neighbour mutations if only short range mutations possible
+                spec = self.next_mut_spec
+                for diff in range(self.spec_prop[spec].diff_num):
+                    i = spec*self.spec_prop[0].diff_num+diff
+                    # am I active?
+                    if not(self.active[i]):
+                        self.active[i] = True
+                        for pos in range(self.env_prop.pos_num):
+                            self.n[i*self.env_prop.pos_num+pos] = self.spec_prop[spec].mut_size*np.random.rand()
+            # introduce long-range mutations of a given species if the strategy is inactive
             else:
-                # kill strategies that are lost, abundance below mut_size*pos_max/2
-                for spec in range(2):
-                    for diff in range(self.spec_prop[spec].diff_num):
-                        i = spec*self.spec_prop[0].diff_num+diff
-                        if self.find_n_diff_tot(diff, spec) <= self.env_prop.mut_size*self.env_prop.pos_max*0.5:
+                spec = self.next_mut_spec
+                old_active = copy.deepcopy(self.active)
+                for diff in range(self.spec_prop[spec].diff_num):
+                    i = spec*self.spec_prop[0].diff_num+diff
+                    # am I active?
+                    if not(old_active[i]):
+                        # do I have an active neighbour?
+                        if (diff > 0 and old_active[i-1]) or (diff<self.spec_prop[spec].diff_num-1 and old_active[i+1]):
+                            self.active[i] = True
                             for pos in range(self.env_prop.pos_num):
-                                self.n[i*self.env_prop.pos_num+pos] = 0
-                            self.active[i] = False
-                if self.time > 0:
-                    # introduce mutations of a given species if there is a neigbouring active strategy
-                    spec = self.next_mut_spec
-                    old_active = copy.deepcopy(self.active)
-                    for diff in range(self.spec_prop[spec].diff_num):
-                        i = spec*self.spec_prop[0].diff_num+diff
-                        # am I active?
-                        if not(old_active[i]):
-                            # do I have an active neighbour?
-                            if (diff>0 and old_active[i-1]) or (diff<self.spec_prop[spec].diff_num-1 and old_active[i+1]):
-                                self.active[i] = True
-                                for pos in range(self.env_prop.pos_num):
-                                    self.n[i*self.env_prop.pos_num+pos] = self.env_prop.mut_size*np.random.rand()
-            # update next_mut_time and next_mut_spec
+                                self.n[i*self.env_prop.pos_num+pos] = self.spec_prop[spec].mut_size*np.random.rand()
+        # update next_mut_time and next_mut_spec
+        if self.time > self.next_mut_time or self.time == 0:
             total_mut_rate = self.spec_prop[0].mut_rate+self.spec_prop[0].mut_rate
             if total_mut_rate == 0:
                 self.next_mut_time = np.inf
@@ -588,28 +594,28 @@ def perturbation(env_prop, spec_prop, seed, n, type, diffs):
         np.random.seed(seed)
     if type == 0:
         for i in range(n.size):
-            if n[i]<=env_prop.mut_size/2:
-                n[i] = env_prop.mut_size*np.random.rand()
+            if n[i]<=env_prop.pert_size/2:
+                n[i] = env_prop.pert_size*np.random.rand()
             else:
-                n[i] = n[i]*(1+env_prop.mut_size*(np.random.rand()-0.5))
+                n[i] = n[i]*(1+env_prop.pert_size*(np.random.rand()-0.5))
     elif type == 1:
         for spec in range(2):
             for pos in range(env_prop.pos_num):
                 i = spec*spec_prop[0].diff_num*env_prop.pos_num+diffs[spec]*env_prop.pos_num+pos
-                if n[i] <= env_prop.mut_size / 2:
-                    n[i] = env_prop.mut_size * np.random.rand()
+                if n[i] <= env_prop.pert_size / 2:
+                    n[i] = env_prop.pert_size * np.random.rand()
                 else:
-                    n[i] = n[i] * (1 + env_prop.mut_size * (np.random.rand() - 0.5))
+                    n[i] = n[i] * (1 + env_prop.pert_size * (np.random.rand() - 0.5))
     elif type == 2:
         for spec in range(2):
             for diff in range(spec_prop[spec].diff_num):
                 if diff != diffs[spec]:
                     for pos in range(env_prop.pos_num):
                         i = spec * spec_prop[0].diff_num * env_prop.pos_num + diff * env_prop.pos_num + pos
-                        if n[i] <= env_prop.mut_size / 2:
-                            n[i] = env_prop.mut_size * np.random.rand()
+                        if n[i] <= env_prop.pert_size / 2:
+                            n[i] = env_prop.pert_size * np.random.rand()
                         else:
-                            n[i] = n[i] * (1 + env_prop.mut_size * (np.random.rand() - 0.5))
+                            n[i] = n[i] * (1 + env_prop.pert_size * (np.random.rand() - 0.5))
     return n
 
 ###
@@ -788,8 +794,8 @@ def plot_fitness(pattern, white_time, ax, mutation_times, labels):
         ax.set_ylabel("total fitness $F_i$", fontsize=12)
 
 # Plot evolution of diffusivity in time
-# Input: pattern, ax, labels
-def plot_expected_diffusivity(pattern, plot_times, ax, labels):
+# Input: pattern, ax, labels, background (diffusivity plane)
+def plot_expected_diffusivity(pattern, plot_times, ax, background, labels):
     # define colors
     colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
     # prepare the times and fitness data
@@ -798,7 +804,8 @@ def plot_expected_diffusivity(pattern, plot_times, ax, labels):
     index = round(pattern.time / pattern.env_prop.time_step) % exp_diff_num
     exp_diff = np.roll(pattern.exp_diff, -(index+1), axis=1)
     # plot diffusivity plane
-    plot_diffusivity_plane(pattern.env_prop, pattern.spec_prop, ax, False)
+    if background:
+        plot_diffusivity_plane(pattern.env_prop, pattern.spec_prop, ax, False)
     # plot diffusivity trajectory
     ax.plot(exp_diff[0], exp_diff[1], color="#d4aa00ff", linewidth=3, zorder=10, clip_on=False)
     # mark diffusivity at specified times
@@ -827,7 +834,7 @@ def find_invasion_exponent(pattern, inv_spec, inv_diff, after_t):
     # introduce small proportion of invaders
     for pos in range(pattern.env_prop.pos_num):
         i = inv_spec * pattern.spec_prop[0].diff_num * pattern.env_prop.pos_num + inv_diff * pattern.env_prop.pos_num + pos
-        pattern.n[i] = pattern.env_prop.mut_size * np.random.rand()
+        pattern.n[i] = pattern.spec_prop[inv_spec].mut_size * np.random.rand()
     m_0 = pattern.find_n_diff_tot(inv_diff, inv_spec)
     # continue evolution for time after_t
     while pattern.time<after_t:
@@ -948,11 +955,11 @@ def plot_pip(env_prop, spec_prop, spec_fixed, d_fix, d_var, before_t, after_t, a
     ax.tick_params(axis='both', which='major', labelsize=12)
     if labels:
         if spec_variable == 0:
-            ax.set_xlabel("resident $D_A$", fontsize=12, labelpad=-8)
-            ax.set_ylabel("invader $D_A$", fontsize=12, labelpad=-7)
+            ax.set_xlabel("resident $d_A$", fontsize=12, labelpad=-8)
+            ax.set_ylabel("invader $d_A$", fontsize=12, labelpad=-7)
         else:
-            ax.set_xlabel("resident $D_I$", fontsize=12, labelpad=-8)
-            ax.set_ylabel("invader $D_I$", fontsize=12, labelpad=-7)
+            ax.set_xlabel("resident $d_I$", fontsize=12, labelpad=-8)
+            ax.set_ylabel("invader $d_I$", fontsize=12, labelpad=-7)
 
 # Plot how mutant perturbations evolve in time
 # Measure invasion exponent
@@ -970,7 +977,7 @@ def plot_mut_pert(pattern, inv_spec, inv_diff, after_t, neutral_line, seed, ax, 
     pattern.active[inv_spec * pattern.spec_prop[0].diff_num + inv_diff] = True
     for pos in range(pattern.env_prop.pos_num):
         i = inv_spec * pattern.spec_prop[0].diff_num * pattern.env_prop.pos_num + inv_diff * pattern.env_prop.pos_num + pos
-        pattern.n[i] = pattern.env_prop.mut_size * np.random.rand()
+        pattern.n[i] = pattern.spec_prop[inv_spec].mut_size * np.random.rand()
     m_0 = pattern.find_n_diff_tot(inv_diff, inv_spec)
     # plot neutral line
     if neutral_line:

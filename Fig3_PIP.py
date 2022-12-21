@@ -10,7 +10,7 @@ import Pattern as pt
 # PARAMETERS
 ###
 # External: By varying the truth value, Fig. 3b-e (true) and its SI complement (false) are reproduced
-eco_forcing = True
+eco_forcing = False
 
 # Internal
 seed = 0
@@ -18,7 +18,7 @@ d0_fix = 0.1
 d1_fix = 1
 d_var = [0, 1, 31]
 before_t = 300
-after_t = 200
+after_t = 150
 spec_variable = 1
 if eco_forcing:
     spec_variable = 0
@@ -75,9 +75,12 @@ for spec_var in range(2):
 spec_var = spec_variable
 spec_fixed = 1 - spec_var
 if eco_forcing:
-    env_prop.int_fitness = pt.IntFit1(2, 0.62, 0.5)
+    env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
+    env_prop.pos_num = 101
 else:
-    env_prop.int_fitness = pt.IntFit2(2.4, 8, 1, 1.2)
+    env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
+    env_prop.pos_num = 121
+env_prop.initialize()
 spec_prop[spec_fixed].diff_min = d_fix[spec_fixed]
 spec_prop[spec_fixed].diff_max = d_fix[spec_fixed]
 spec_prop[spec_fixed].initialize()
@@ -106,15 +109,19 @@ spec_prop = [pt.SpecProp(), pt.SpecProp()]
 if eco_forcing:
     # Make eco plots
     env_prop.int_fitness = pt.IntFit1(2, 0.62, 0.5)
+    env_prop.pos_num = 101
+    env_prop.initialize()
     pt.plot_pip(env_prop, spec_prop, 1, d1_fix, d_var, before_t, after_t, ax_pip_0, True)
     pt.plot_pip(env_prop, spec_prop, 0, d0_fix, d_var, before_t, after_t, ax_pip_1, True)
 else:
     # Make evo plots
     env_prop.int_fitness = pt.IntFit2(2.4, 8, 1, 1.2)
+    env_prop.pos_num = 121
+    env_prop.initialize()
     pt.plot_pip(env_prop, spec_prop, 1, d1_fix, d_var, before_t, after_t, ax_pip_0, True)
     pt.plot_pip(env_prop, spec_prop, 0, d0_fix, d_var, before_t, after_t, ax_pip_1, True)
-plt.show()
 if eco_forcing:
     fig.savefig("Figures/Sketches/Fig3_PIPeco.svg")
 else:
     fig.savefig("Figures/Sketches/Fig3_PIPevo.svg")
+plt.show()
