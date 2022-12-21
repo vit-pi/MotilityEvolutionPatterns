@@ -11,7 +11,10 @@ import datetime
 ###
 # PARAMETERS
 ###
-# External: By varying the truth values of the two parameters, all supplementary movies are reproduced
+# External: By varying the truth values of the distant_mutations and eco_forcing parameters, Supplementary Movies 1-4
+# are reproduced. By setting init_homog=True, distant_mutations = False, eco_forcing = True, Supplementary Movie 5 is
+# reproduced.
+
 distant_mutations = False
 eco_forcing = True
 init_homog = False

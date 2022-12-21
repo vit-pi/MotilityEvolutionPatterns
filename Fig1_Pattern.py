@@ -7,7 +7,7 @@ import Pattern as pt
 ###
 # PARAMETERS
 ###
-# External: patterned (true,false) to reproduce the corresponding steady state in Fig 1b
+# External: patterned (true,false) to reproduce the corresponding steady state in Fig 1d
 patterned = True
 # Internal
 t_max = 1000
