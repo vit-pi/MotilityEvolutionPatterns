@@ -16,6 +16,7 @@ if patterned:
 else:
     d0 = 1
 d1 = 1
+colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
 
 ###
 # RUN THE SIMULATION AND MAKE A SNAPSHOT
@@ -39,8 +40,8 @@ axs[0].set_xticks([])
 axs[0].set_yticks([])
 axs[1].set_xticks([])
 axs[1].set_yticks([])
-axs[0].set_ylabel("$n_A$", rotation=0, ha='right', va="center", fontsize=12)
-axs[1].set_ylabel("$n_I$", rotation=0, ha='right', va="center", fontsize=12)
+axs[0].set_ylabel("$n_A$", rotation=0, ha='right', va="center", fontsize=12, color=colors[0])
+axs[1].set_ylabel("$n_I$", rotation=0, ha='right', va="center", fontsize=12, color=colors[1])
 axs[1].set_xlabel("space $x$", fontsize=12)
 
 # Show plot

@@ -38,7 +38,7 @@ class SpecProp:
 class EnvProp:
     def __init__(self):
         self.pos_max = 100
-        self.pos_num = 121
+        self.pos_num = 176
         self.time_step = 1e-1
         self.int_fitness = IntFit1(2,0.62,0.5) #IntFit2(2.4,8,1,1.2) #IntFit1(2,0.62,0.5)
         self.pos_step = 0
@@ -626,6 +626,7 @@ def perturbation(env_prop, spec_prop, seed, n, type, diffs):
 # Plot a heatmap snapshot of the current state of the pattern
 # Input: pattern, axs=[ax0, ax1] (one axis for each species)
 def plot_heatmap_snapshot(pattern, axs, labels):
+    colors = ["#214478ff", "#aa0000ff"]  # [blue, red]
     n = pattern.vector_to_array()
     images = []
     for spec in range(2):
@@ -658,9 +659,9 @@ def plot_heatmap_snapshot(pattern, axs, labels):
         if labels:
             axs[spec].set_xlabel("space $x$", fontsize=12, labelpad=-8)
             if spec == 0:
-                axs[spec].set_ylabel("diffusivity $D_A$", fontsize=12, labelpad=-7*pad)
+                axs[spec].set_ylabel("motility $d_A$", fontsize=12, labelpad=-7*pad, color=colors[0])
             else:
-                axs[spec].set_ylabel("diffusivity $D_I$", fontsize=12, labelpad=-7*pad)
+                axs[spec].set_ylabel("motility $d_I$", fontsize=12, labelpad=-7*pad, color=colors[1])
     return images
 
 # Plot a cummulative heatmap snapshot of the current state of the pattern (i.e. integrate over diffusivities)
@@ -697,6 +698,7 @@ def plot_cumulative_heatmap_snapshot(pattern, axs, labels):
 # Input: env_prop, spec_prop, ax
 def plot_diffusivity_plane(env_prop, spec_prop, ax, labels):
     # prepare diffusivity axes
+    colors = ["#214478ff", "#aa0000ff"]  # [blue, red]
     num = 100
     d0 = np.linspace(spec_prop[0].diff_min, 2*spec_prop[0].diff_max, num=num)
     d1 = np.zeros(num)
@@ -718,8 +720,8 @@ def plot_diffusivity_plane(env_prop, spec_prop, ax, labels):
     ax.set_yticks([])
     # put labels
     if labels:
-        ax.set_xlabel("diffusivity $d_A$", fontsize=12)
-        ax.set_ylabel("diffusivity $d_I$", fontsize=12)
+        ax.set_xlabel("motility $d_A$", fontsize=12, color=colors[0])
+        ax.set_ylabel("motility $d_I$", fontsize=12, color=colors[1])
 
 # Plot diffusivity distribution
 # Input: pattern, axs = [ax_diffplane, ax_diffblue, ax_diffred], labels
@@ -755,8 +757,8 @@ def plot_diffusivity_distribution(pattern, axs, labels):
     axs[2].set_xticks([])
     # include labels
     if labels:
-        axs[0].set_xlabel("diffusivity $D_A$", fontsize=12, labelpad=-8)
-        axs[0].set_ylabel("diffusivity $D_I$", fontsize=12, labelpad=-7)
+        axs[0].set_xlabel("motility $d_A$", fontsize=12, labelpad=-8, color=colors[0])
+        axs[0].set_ylabel("motility $d_I$", fontsize=12, labelpad=-7, color=colors[1])
 
 # Plot evolution of fitness in time
 # Input: pattern, white_time (extra time with no plot), ax, labels
@@ -821,8 +823,8 @@ def plot_expected_diffusivity(pattern, plot_times, ax, background, labels):
     ax.set_ylim(pattern.spec_prop[1].diff_min, 1.1*pattern.spec_prop[1].diff_max)
     # include labels
     if labels:
-        ax.set_xlabel("diffusivity $D_A$", fontsize=12, labelpad=-8)
-        ax.set_ylabel("diffusivity $D_I$", fontsize=12, labelpad=-7)
+        ax.set_xlabel("motility $d_A$", fontsize=12, labelpad=-8, color=colors[0])
+        ax.set_ylabel("motility $d_I$", fontsize=12, labelpad=-7, color=colors[1])
 
 
 # Measure invasion exponent
@@ -954,12 +956,13 @@ def plot_pip(env_prop, spec_prop, spec_fixed, d_fix, d_var, before_t, after_t, a
     ax.set_yticks([d_var[0], d_var[1]])
     ax.tick_params(axis='both', which='major', labelsize=12)
     if labels:
+        colors_labels = ["#214478ff", "#aa0000ff"]  # [blue, red]
         if spec_variable == 0:
-            ax.set_xlabel("resident $d_A$", fontsize=12, labelpad=-8)
-            ax.set_ylabel("invader $d_A$", fontsize=12, labelpad=-7)
+            ax.set_xlabel("resident $d_A$", fontsize=12, labelpad=-8, color=colors_labels[0])
+            ax.set_ylabel("invader $d_A$", fontsize=12, labelpad=-7, color=colors_labels[0])
         else:
-            ax.set_xlabel("resident $d_I$", fontsize=12, labelpad=-8)
-            ax.set_ylabel("invader $d_I$", fontsize=12, labelpad=-7)
+            ax.set_xlabel("resident $d_I$", fontsize=12, labelpad=-8, color=colors_labels[1])
+            ax.set_ylabel("invader $d_I$", fontsize=12, labelpad=-7, color=colors_labels[1])
 
 # Plot how mutant perturbations evolve in time
 # Measure invasion exponent

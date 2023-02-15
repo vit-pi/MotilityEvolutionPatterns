@@ -15,8 +15,8 @@ eco_forcing = True
 # Internal
 if eco_forcing:
     filename = "DiffEvo_PreyPred"
-    t_max = 1800
-    plot_times = [100, 300, 700, 1100]
+    t_max = 2500
+    plot_times = [100, 400, 900, 1500]
 else:
     filename = "DiffEvo_CoopDef"
     t_max = 1800
@@ -39,7 +39,7 @@ ax = fig.add_subplot(gs[:, :])
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 101
+    env_prop.pos_num = 176
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
     env_prop.pos_num = 121

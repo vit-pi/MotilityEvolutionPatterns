@@ -11,17 +11,20 @@ import datetime
 ###
 # PARAMETERS
 ###
-# External: By varying the truth values of the distant_mutations and eco_forcing parameters, Supplementary Movies 1-4
-# are reproduced. By setting init_homog=True, distant_mutations = False, eco_forcing = True, Supplementary Movie 5 is
-# reproduced.
+# External: By varying the truth values of the parameters below, Movies 1-5 are reproduced.
+# Movie 1: distant_mutations=False, eco_forcing parameters=True, init_homog=False
+# Movie 2: distant_mutations=True, eco_forcing parameters=True, init_homog=False
+# Movie 3: distant_mutations=False, eco_forcing parameters=True, init_homog=True
+# Movie 4: distant_mutations=False, eco_forcing parameters=False, init_homog=False
+# Movie 5: distant_mutations=True, eco_forcing parameters=False, init_homog=False
 
 distant_mutations = False
-eco_forcing = True
+eco_forcing = False
 init_homog = False
 
 # Internal
 if eco_forcing:
-    title = "Prey-Predator Model\n"
+    title = "Predator-Prey Model\n"
     filename = "PreyPred_"
 else:
     title = "Cooperator-Defector Model\n"
@@ -29,18 +32,19 @@ else:
 if distant_mutations:
     t_max = 1110
     plot_step = 10
-    title += "Long-range Mutations\n"
+    title += "Large-Effect Mutations\n"
     filename += "LongMut_"
 else:
-    t_max = 4710#3110
+    t_max = 4710
     plot_step = 10
-    title += "Short-range Mutations\n"
+    title += "Small-Effect Mutations\n"
     filename += "ShortMut_"
 seed = 0
 if init_homog:
     t_max = 2010
+    plot_step = 1
     d0 = 1
-    d1 = 0.1
+    d1 = 0.9
     filename += "InitHomog_"
 else:
     d0 = 0.1
@@ -55,10 +59,14 @@ gs = gridspec.GridSpec(2, 2, figure=fig, wspace=0.5, hspace=0.35)
 colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
 ax_blue = fig.add_subplot(gs[0, 0])
 ax_blue.set_xlabel("space $x$", labelpad=-8)
-ax_blue.set_ylabel("diffusivity $D_A$", labelpad=-7, color=colors[0])
 ax_red = fig.add_subplot(gs[1, 0])
 ax_red.set_xlabel("space $x$", labelpad=-8)
-ax_red.set_ylabel("diffusivity $D_I$", labelpad=-7, color=colors[1])
+if eco_forcing:
+    ax_blue.set_ylabel("prey motility $d_A$", labelpad=-7, color=colors[0])
+    ax_red.set_ylabel("predator motility $d_I$", labelpad=-7, color=colors[1])
+else:
+    ax_blue.set_ylabel("cooperator motility $d_A$", labelpad=-7, color=colors[0])
+    ax_red.set_ylabel("defector motility $d_I$", labelpad=-7, color=colors[1])
 ax_fitness = fig.add_subplot(gs[1, 1])
 ax_fitness.set_xlabel("time t")
 ax_fitness.set_ylabel("total fitness $F_i$")
@@ -78,8 +86,8 @@ else:
         ax_fitness.set_yticks([-20, -15, -10, -5, 0, 5])
 sub_gs = gs[0, 1].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), wspace=0.05, hspace=0.05)
 ax_diffplane = fig.add_subplot(sub_gs[1, 0])
-ax_diffplane.set_xlabel("diffusivity $D_A$", labelpad=-8, color=colors[0])
-ax_diffplane.set_ylabel("diffusivity $D_I$", labelpad=-7, color=colors[1])
+ax_diffplane.set_xlabel("motility $d_A$", labelpad=-8, color=colors[0])
+ax_diffplane.set_ylabel("motility $d_I$", labelpad=-7, color=colors[1])
 ax_diffblue = fig.add_subplot(sub_gs[0, 0], sharex=ax_diffplane)
 ax_diffred = fig.add_subplot(sub_gs[1, 1], sharey=ax_diffplane)
 
@@ -90,7 +98,7 @@ ax_diffred = fig.add_subplot(sub_gs[1, 1], sharey=ax_diffplane)
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 101
+    env_prop.pos_num = 176
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
     env_prop.pos_num = 121

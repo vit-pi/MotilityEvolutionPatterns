@@ -10,7 +10,7 @@ import Pattern as pt
 # PARAMETERS
 ###
 # External: By varying the truth value, Fig. 3b-e (true) and its SI complement (false) are reproduced
-eco_forcing = False
+eco_forcing = True
 
 # Internal
 seed = 0
@@ -22,6 +22,7 @@ after_t = 150
 spec_variable = 1
 if eco_forcing:
     spec_variable = 0
+colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
 
 ###
 # CREATE AND FORMAT FIGURE
@@ -31,18 +32,18 @@ gs = gridspec.GridSpec(2, 6, figure=fig, height_ratios=(2, 3), wspace=1, hspace=
 ax_pip_0 = fig.add_subplot(gs[1, 0:3])
 ax_pip_1 = fig.add_subplot(gs[1, 3:6])
 ax_invader = fig.add_subplot(gs[0, 2:4])
-ax_invader.set_ylabel("invaders", fontsize=12)
+ax_invader.set_ylabel("invaders", fontsize=12, color=colors[spec_variable])
 ax_invader.set_xlabel("time $t$", fontsize=12, labelpad=-7)
 sub_gs0 = gs[0, 0:2].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), wspace=0.05, hspace=0.05)
 ax_diffplane0 = fig.add_subplot(sub_gs0[1, 0])
-ax_diffplane0.set_xlabel("diffusivity $D_A$", fontsize=12, labelpad=-8)
-ax_diffplane0.set_ylabel("diffusivity $D_I$", fontsize=12, labelpad=-7)
+ax_diffplane0.set_xlabel("motility $d_A$", fontsize=12, labelpad=-8, color=colors[0])
+ax_diffplane0.set_ylabel("motility $d_I$", fontsize=12, labelpad=-7, color=colors[1])
 ax_diffblue0 = fig.add_subplot(sub_gs0[0, 0], sharex=ax_diffplane0)
 ax_diffred0 = fig.add_subplot(sub_gs0[1, 1], sharey=ax_diffplane0)
 sub_gs1 = gs[0, 4:6].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), wspace=0.05, hspace=0.05)
 ax_diffplane1 = fig.add_subplot(sub_gs1[1, 0])
-ax_diffplane1.set_xlabel("diffusivity $D_A$", fontsize=12, labelpad=-8)
-ax_diffplane1.set_ylabel("diffusivity $D_I$", fontsize=12, labelpad=-7)
+ax_diffplane1.set_xlabel("motility $d_A$", fontsize=12, labelpad=-8, color=colors[0])
+ax_diffplane1.set_ylabel("motility $d_I$", fontsize=12, labelpad=-7, color=colors[1])
 ax_diffblue1 = fig.add_subplot(sub_gs1[0, 0], sharex=ax_diffplane1)
 ax_diffred1 = fig.add_subplot(sub_gs1[1, 1], sharey=ax_diffplane1)
 ax_diffplane = [ax_diffplane0, ax_diffplane1]
@@ -54,7 +55,6 @@ ax_diffred = [ax_diffred0, ax_diffred1]
 ###
 # Prepare pattern objects
 d_fix = [d0_fix, d1_fix]
-colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
 env_prop = pt.EnvProp()
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 for spec_var in range(2):
@@ -63,10 +63,8 @@ for spec_var in range(2):
     pattern = pt.Pattern(env_prop, spec_prop, pt.init_pattern(env_prop, spec_prop, None, None, 1, d0_fix, d1_fix))
     if spec_fixed == 0:
         diff_invader = int(spec_prop[1].diff_num/3)
-        #ax_diffplane[spec_var].axvline(x=d_fix[spec_fixed], color='black')
     else:
         diff_invader = int(spec_prop[0].diff_num/2)
-        #ax_diffplane[spec_var].axhline(y=d_fix[spec_fixed], color="black")
     for pos in range(env_prop.pos_num):
         pattern.n[spec_var*spec_prop[0].diff_num*env_prop.pos_num+diff_invader*env_prop.pos_num+pos] += env_prop.int_fitness.fixed_point[0]/4
     pt.plot_diffusivity_distribution(pattern, [ax_diffplane[spec_var], ax_diffblue[spec_var], ax_diffred[spec_var]], False)
@@ -76,7 +74,7 @@ spec_var = spec_variable
 spec_fixed = 1 - spec_var
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 101
+    env_prop.pos_num = 176
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
     env_prop.pos_num = 121

@@ -25,7 +25,7 @@ if eco_forcing:
     else:
         filename = "PreyPred_ShortMut"
         t_max = 1700
-        plot_times = [100, 300, 700, 1100]
+        plot_times = [100, 400, 900, 1500]
 else:
     if distant_mutations:
         filename = "CoopDef_LongMut"
@@ -38,11 +38,12 @@ else:
 seed = 0
 d0 = 0.1
 d1 = 1
+colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
 
 ###
 # CREATE AND FORMAT FIGURE
 ###
-fig = plt.figure(figsize=(10, 6.7))#, layout="constrained")
+fig = plt.figure(figsize=(10, 6.7))
 gs = gridspec.GridSpec(3, 5, figure=fig, wspace=0.4, hspace=0.4, width_ratios=(0.3, 3, 3, 3, 3))
 ax_fitness = fig.add_subplot(gs[2,:])
 if eco_forcing:
@@ -70,8 +71,8 @@ for snap in range(4):
         ax_red.append(fig.add_subplot(gs[1, snap + 1], sharex=ax_blue[snap], sharey=ax_blue[0]))
     # add labels
     ax_red[snap].set_xlabel("space $x$", fontsize=12)
-ax_red[0].set_ylabel("diffusivity $D_I$", fontsize=12)
-ax_blue[0].set_ylabel("diffusivity $D_A$", fontsize=12)
+ax_red[0].set_ylabel("motility $d_I$", fontsize=12, color=colors[1])
+ax_blue[0].set_ylabel("motility $d_A$", fontsize=12, color=colors[0])
 ###
 # RUN THE SIMULATION AND MAKE A SNAPSHOT
 ###
@@ -79,7 +80,7 @@ ax_blue[0].set_ylabel("diffusivity $D_A$", fontsize=12)
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 101
+    env_prop.pos_num = 176
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
     env_prop.pos_num = 121
@@ -109,13 +110,13 @@ pattern.time = np.floor(pattern.time)
 pt.plot_fitness(pattern, 0, ax_fitness, True, False)
 # Plot color bars
 if eco_forcing:
-    labels = ["prey $N_A$", "predators $N_I$"]
+    labels = ["prey $n_A$", "predators $n_I$"]
 else:
-    labels = ["cooperators $N_A$", "defectors $N_I$"]
+    labels = ["cooperators $n_A$", "defectors $n_I$"]
 for spec in range(2):
     vmin, vmax = im[spec].get_clim()
     plt.colorbar(im[spec], cax=ax_colorbars[spec], ticks=[0, vmax])
-    ax_colorbars[spec].set_ylabel(labels[spec], fontsize=12, labelpad=-60)
+    ax_colorbars[spec].set_ylabel(labels[spec], fontsize=12, labelpad=-60, color=colors[spec])
     ax_colorbars[spec].yaxis.set_ticks_position('left')
     ax_colorbars[spec].tick_params(axis='both', which='major', labelsize=12)
 # Plot
