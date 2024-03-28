@@ -12,8 +12,8 @@ import Pattern as pt
 ###
 # PARAMETERS
 ###
-# External: By varying the truth value, Fig. 2 (true) and its SI complement (false) are reproduced
-eco_forcing = True
+# External: By varying the truth value, Fig. 2 (true) and Fig. S3 (false) are reproduced
+eco_forcing = False
 
 # Internal
 distant_mutations = False
@@ -24,8 +24,8 @@ if eco_forcing:
         plot_times = [100, 200, 300, 400]
     else:
         filename = "PreyPred_ShortMut"
-        t_max = 1700
-        plot_times = [100, 400, 900, 1500]
+        t_max = 1400
+        plot_times = [100, 300, 870, 1200]
 else:
     if distant_mutations:
         filename = "CoopDef_LongMut"
@@ -33,8 +33,8 @@ else:
         plot_times = [100, 200, 300, 400]
     else:
         filename = "CoopDef_ShortMut"
-        t_max = 1700
-        plot_times = [100, 300, 800, 1250]
+        t_max = 1400
+        plot_times = [100, 400, 700, 1100]
 seed = 0
 d0 = 0.1
 d1 = 1
@@ -80,17 +80,17 @@ ax_blue[0].set_ylabel("motility $d_A$", fontsize=12, color=colors[0])
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 176
+    env_prop.pos_num = 201
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
-    env_prop.pos_num = 121
+    env_prop.pos_num = 201
 env_prop.distant_mutations = distant_mutations
 env_prop.fitness_memory_time = t_max
 env_prop.initialize()
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
 for spec in range(2):
     spec_prop[spec].diff_num = 11
-    spec_prop[spec].mut_rate = 5e-3
+    spec_prop[spec].mut_rate = 1/150
     spec_prop[spec].initialize()
 pattern = pt.Pattern(env_prop, spec_prop, pt.init_pattern(env_prop, spec_prop, 1, seed, 1, d0, d1))
 # Update pattern object up until t_max & make plot

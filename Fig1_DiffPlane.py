@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import Pattern as pt
 
-# No External parameters - background of Fig 1d is reproduced
+# No External parameters - background of Fig. 1d is reproduced
 
 ###
 # PLOT

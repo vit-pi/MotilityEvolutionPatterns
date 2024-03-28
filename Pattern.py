@@ -38,7 +38,7 @@ class SpecProp:
 class EnvProp:
     def __init__(self):
         self.pos_max = 100
-        self.pos_num = 176
+        self.pos_num = 201  #176
         self.time_step = 1e-1
         self.int_fitness = IntFit1(2,0.62,0.5) #IntFit2(2.4,8,1,1.2) #IntFit1(2,0.62,0.5)
         self.pos_step = 0
@@ -97,6 +97,66 @@ class IntFit1:
             return True
         else:
             return True
+
+    # the instability condition for polymorphic species with instability given by positive values of the condition
+    # formulated in terms of coefficients of a cubic equation ai
+    def instability_condition(self,a0,a1,a2,a3,b0=1,b1=0,b2=1):
+        c0 = a2**2-3*a1*a3
+        c1 = a2 + np.sqrt(np.maximum(c0,0))
+        c2 = 2*a2**3+2*np.maximum(c0,0)**1.5-9*a1*a2*a3+27*a0*a3**2
+        d0 = -b1
+        d1 = b1**2-4*b0*b2
+        quad_root1 = (-b1-np.sqrt(np.maximum(d1,0)))/(2*b2)
+        quad_root2 = (-b1+np.sqrt(np.maximum(d1,0)))/(2*b2)
+        d2 = c1+3*a3*quad_root1
+        d3 = -3*a3*quad_root2-c1
+        g = lambda x: a0+a1*x+a2*x**2+a3*x**3
+        d4 = - g(quad_root1)
+        d5 = - g(quad_root2)
+        c_min = np.minimum.reduce([c0,c1,c2])
+        d_scalar_min = np.minimum.reduce([d0,d1])
+        d_vector_min = np.minimum.reduce([d2,d3,d4,d5])
+        d_min = np.minimum(d_scalar_min,d_vector_min)
+        condition = np.minimum(c_min,-d_min)
+        return condition
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 1
+    def turing_poly1(self, q, d0, d1):
+        a3 = -d0*d1
+        a2 = self.j11*(d0*(1-q)+d1*q)+self.j22*d0*d1
+        a1 = -self.detJ*(d0*(1-q)+d1*q)
+        a0 = 0
+        return self.instability_condition(a0, a1, a2, a3)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 2
+    def turing_poly2(self, q, d0, d1):
+        a3 = -d0*d1
+        a2 = self.j22*(d0*(1-q)+d1*q)+self.j11*d0*d1
+        a1 = -self.detJ*(d0*(1-q)+d1*q)
+        a0 = 0
+        return self.instability_condition(a0, a1, a2, a3)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 1
+    def wave_poly1(self, q, d0, d1):
+        a3 = -(d0+d1)*(1+d0)*(1+d1)
+        a2 = self.j11*((1+d0)*(1+d1)+(d0+d1)*(1+d0*(1-q)+d1*q))+self.j22*(d0+d1)*(2+d0+d1)
+        a1 = -self.j11*self.j22*2*(1+d0+d1)+self.j12*self.j21*(1+d0*q+d1*(1-q))-self.j11**2*(1+d0*(1-q)+d1*q)-self.j22**2*(d0+d1)
+        a0 = self.detJ*self.trJ
+        b2 = d0 + d1 + d0*d1
+        b1 = - (1+d0*(1-q)+d1*q)*self.j11-(d0+d1)*self.j22
+        b0 = self.detJ
+        return self.instability_condition(a0, a1, a2, a3, b0, b1, b2)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 2
+    def wave_poly2(self, q, d0, d1):
+        a3 = -(d0+d1)*(1+d0)*(1+d1)
+        a2 = self.j22*((1+d0)*(1+d1)+(d0+d1)*(1+d0*(1-q)+d1*q))+self.j11*(d0+d1)*(2+d0+d1)
+        a1 = -self.j11*self.j22*2*(1+d0+d1)+self.j12*self.j21*(1+d0*q+d1*(1-q))-self.j22**2*(1+d0*(1-q)+d1*q)-self.j11**2*(d0+d1)
+        a0 = self.detJ*self.trJ
+        b2 = d0 + d1 + d0*d1
+        b1 = - (1+d0*(1-q)+d1*q)*self.j22-(d0+d1)*self.j11
+        b0 = self.detJ
+        return self.instability_condition(a0, a1, a2, a3, b0, b1, b2)
 
     # return critical d1 for a given d0 so that for d1 above this value, a Turing instability occurs
     def critical_d1(self, d0):
@@ -186,6 +246,46 @@ class IntFit2:
         else:
             return True
 
+    # the instability condition for polymorphic species with instability given by positive values of the condition
+    # formulated in terms of coefficients of a cubic equation ai
+    def instability_condition(self,a0,a1,a2,a3):
+        c0 = a2**2-3*a1*a3
+        c1 = a2 + np.sqrt(np.minimum(c0,0))
+        c2 = 2*a2**3+2*np.minimum(c0,0)**1.5-9*a1*a2*a3+27*a0*a3**2
+        return np.minimum.reduce([c0,c1,c2])
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 1
+    def turing_poly1(self, q, d0, d1):
+        a3 = -d0*d1
+        a2 = self.j11*(d0*(1-q)+d1*q)+self.j22*d0*d1
+        a1 = -self.detJ*(d0*(1-q)+d1*q)
+        a0 = 0
+        return self.instability_condition(a0, a1, a2, a3)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 2
+    def turing_poly2(self, q, d0, d1):
+        a3 = -d0*d1
+        a2 = self.j22*(d0*(1-q)+d1*q)+self.j11*d0*d1
+        a1 = -self.detJ*(d0*(1-q)+d1*q)
+        a0 = 0
+        return self.instability_condition(a0, a1, a2, a3)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 1
+    def wave_poly1(self, q, d0, d1):
+        a3 = -(d0+d1)*(1+d0)*(1+d1)
+        a2 = self.j11*((1+d0)*(1+d1)+(d0+d1)*(1+d0*(1-q)+d1*q))+self.j22*(d0+d1)*(2+d0+d1)
+        a1 = -self.j11*self.j22*2*(1+d0+d1)+self.j12*self.j21*(1+d0*q+d1*(1-q))-self.j11**2*(1+d0*(1-q)+d1*q)-self.j22**2*(d0+d1)
+        a0 = self.detJ*self.trJ
+        return self.instability_condition(a0, a1, a2, a3)
+
+    # return a value of the condition for Turing pattern formation with polymorphism in species 2
+    def wave_poly2(self, q, d0, d1):
+        a3 = -(d0+d1)*(1+d0)*(1+d1)
+        a2 = self.j22*((1+d0)*(1+d1)+(d0+d1)*(1+d0*(1-q)+d1*q))+self.j11*(d0+d1)*(2+d0+d1)
+        a1 = -self.j11*self.j22*2*(1+d0+d1)+self.j12*self.j21*(1+d0*q+d1*(1-q))-self.j22**2*(1+d0*(1-q)+d1*q)-self.j11**2*(d0+d1)
+        a0 = self.detJ*self.trJ
+        return self.instability_condition(a0, a1, a2, a3)
+
     # return critical d1 for a given d0 so that ford d1 above this value, a Turing instability occurs
     def critical_d1(self, d0):
         if 0 == self.j11:
@@ -235,6 +335,8 @@ class Pattern:
         # fitness variable
         self.fitness_tot = np.zeros((2, round(self.env_prop.fitness_memory_time / self.env_prop.time_step)+1))
         self.fitness_tot[:] = np.nan
+        self.n_tot = np.zeros((2, round(self.env_prop.fitness_memory_time / self.env_prop.time_step) + 1))
+        self.n_tot[:] = np.nan
         self.exp_diff = np.zeros((2, round(self.env_prop.diff_memory_time / self.env_prop.time_step) + 1))
         self.exp_diff[:] = np.nan
         # adaptive dynamics parameters:
@@ -473,7 +575,7 @@ class Pattern:
                                 self.n[i*self.env_prop.pos_num+pos] = self.spec_prop[spec].mut_size*np.random.rand()
         # update next_mut_time and next_mut_spec
         if self.time > self.next_mut_time or self.time == 0:
-            total_mut_rate = self.spec_prop[0].mut_rate+self.spec_prop[0].mut_rate
+            total_mut_rate = self.spec_prop[0].mut_rate+self.spec_prop[1].mut_rate
             if total_mut_rate == 0:
                 self.next_mut_time = np.inf
             else:
@@ -506,6 +608,7 @@ class Pattern:
         index = round(self.time/self.env_prop.time_step) % (round(self.env_prop.fitness_memory_time/self.env_prop.time_step)+1)
         for spec in range(2):
             self.fitness_tot[spec][index] = self.find_fitness_tot(spec)
+            self.n_tot[spec][index] = self.find_n_tot(spec)
 
     # expected diffusivity update
     def diff_update(self):
@@ -643,7 +746,7 @@ def plot_heatmap_snapshot(pattern, axs, labels):
             vmax = [0.5,0.2]
         elif pattern.env_prop.int_fitness.type == 1:
             vmax = [0.14, 0.12]
-        im = axs[spec].pcolormesh(pos_axis, diff_axis, n[spec], cmap=my_cmap[spec], vmin=0, vmax=vmax[spec])
+        im = axs[spec].pcolormesh(pos_axis, diff_axis, n[spec], cmap=my_cmap[spec], vmin=0, vmax=vmax[spec], rasterized=True)
         images.append(im)
         # modify ticks and tick_labels
         axs[spec].set_xticks([0, pattern.env_prop.pos_max])
@@ -652,8 +755,8 @@ def plot_heatmap_snapshot(pattern, axs, labels):
             axs[spec].set_yticks([])
             pad = 0
         else:
-            axs[spec].set_yticks([pattern.spec_prop[spec].diff_min+pattern.spec_prop[spec].diff_step/2, pattern.spec_prop[spec].diff_max-pattern.spec_prop[spec].diff_step/2], fontsize=12)
-            axs[spec].set_yticklabels([pattern.spec_prop[spec].diff_min, pattern.spec_prop[spec].diff_max])
+            axs[spec].set_yticks([pattern.spec_prop[spec].diff_min+pattern.spec_prop[spec].diff_step/2, pattern.spec_prop[spec].diff_max-pattern.spec_prop[spec].diff_step/2])
+            axs[spec].set_yticklabels([pattern.spec_prop[spec].diff_min, pattern.spec_prop[spec].diff_max], fontsize=12)
             pad = 1
         # labels
         if labels:
@@ -684,7 +787,7 @@ def plot_cumulative_heatmap_snapshot(pattern, axs, labels):
             vmax = [0.5,0.2]
         elif pattern.env_prop.int_fitness.type == 1:
             vmax = [0.14, 0.12]
-        im = axs[spec].pcolormesh(pos_axis, diff_axis, [n_space_tot[spec]], cmap=my_cmap[spec], vmin=0, vmax=vmax[spec])
+        im = axs[spec].pcolormesh(pos_axis, diff_axis, [n_space_tot[spec]], cmap=my_cmap[spec], vmin=0, vmax=vmax[spec], rasterized=True)
         images.append(im)
         # modify ticks and tick_labels
         axs[spec].set_xticks([])
@@ -723,6 +826,43 @@ def plot_diffusivity_plane(env_prop, spec_prop, ax, labels):
         ax.set_xlabel("motility $d_A$", fontsize=12, color=colors[0])
         ax.set_ylabel("motility $d_I$", fontsize=12, color=colors[1])
 
+# Plot the plane of diffusivities
+# Input: species (0,1), q to determine stationary state, env_prop, spec_prop, ax
+def plot_diffusivity_plane_poly(species, q, env_prop, spec_prop, ax, labels, num):
+    # prepare mesh grid
+    num = int(num)
+    d0_range = np.linspace(spec_prop[species].diff_min, 2*spec_prop[species].diff_max, num=num)
+    d1_range = np.linspace(spec_prop[species].diff_min, 2*spec_prop[species].diff_max, num=num)
+    d0, d1 = np.meshgrid(d0_range, d1_range)
+    # evaluate the conditions for turing and wave instability
+    if species == 0:
+        turing = env_prop.int_fitness.turing_poly1(q,d0,d1)
+        wave = env_prop.int_fitness.wave_poly1(q,d0,d1)
+    else:
+        turing = env_prop.int_fitness.turing_poly2(q, d0, d1)
+        wave = env_prop.int_fitness.wave_poly2(q, d0, d1)
+    # make the plot of boundaries
+    cmap_boundary = mcolors.ListedColormap(["black", "black"])
+    ax.contour(d0, d1, turing, [0], cmap=cmap_boundary)
+    ax.contour(d0, d1, wave, [0], cmap=cmap_boundary)
+    # fill the regions with colour
+    cmap_boundary = mcolors.ListedColormap(["#999999ff", "#999999ff"])
+    ax.contourf(d0, d1, turing, [0,1e4], cmap=cmap_boundary,alpha=0.9)
+    cmap_boundary = mcolors.ListedColormap(["#ccccccff", "#ccccccff"])
+    ax.contourf(d0, d1, wave, [0,1e4], cmap=cmap_boundary, alpha=0.9)
+    # set x,y limits
+    ax.set_xlim(spec_prop[species].diff_min, spec_prop[species].diff_max)
+    ax.set_ylim(spec_prop[species].diff_min, spec_prop[species].diff_max)
+    # scale
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    # remove ticks
+    # put labels
+    colors = ["#214478ff", "#aa0000ff"]  # [blue, red]
+    if labels:
+        ax.set_xlabel("motility $d$", fontsize=12, color=colors[species])
+        ax.set_ylabel("motility $d'$", fontsize=12, color=colors[species])
+
 # Plot diffusivity distribution
 # Input: pattern, axs = [ax_diffplane, ax_diffblue, ax_diffred], labels
 def plot_diffusivity_distribution(pattern, axs, labels):
@@ -760,6 +900,34 @@ def plot_diffusivity_distribution(pattern, axs, labels):
         axs[0].set_xlabel("motility $d_A$", fontsize=12, labelpad=-8, color=colors[0])
         axs[0].set_ylabel("motility $d_I$", fontsize=12, labelpad=-7, color=colors[1])
 
+# Plot evolution of abundance in time
+def plot_abundance(pattern, white_time, ax, mutation_times, labels):
+    # define colors
+    colors = ["#214478ff", "#aa0000ff"]    # [blue, red]
+    # prepare the times and fitness data
+    n_num = np.size(pattern.n_tot[0])
+    times = np.linspace(pattern.time-pattern.env_prop.fitness_memory_time, pattern.time, num=n_num)
+    index = round(pattern.time / pattern.env_prop.time_step) % n_num
+    n_tot = np.roll(pattern.n_tot, -(index + 1), axis=1)
+    # make the plot
+    for i in range(2):
+        ax.plot(times, n_tot[i], color=colors[i], linestyle=":")
+    # plot mutation times
+    if mutation_times:
+        for spec in range(2):
+            for mut_time in reversed(pattern.next_mut_time_memory[spec]):
+                if mut_time <= pattern.time:
+                    ax.axvline(x=mut_time, color=colors[spec], linestyle='--', linewidth=0.8)
+                if mut_time < pattern.time-pattern.env_prop.fitness_memory_time:
+                    break
+    # set limits
+    ax.set_xlim(times[0], times[-1]+white_time)
+    ax.set_xlim(times[0], times[-1]+white_time)
+    # add labels
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    if labels:
+        ax.set_ylabel("total abundance", fontsize=12)
+
 # Plot evolution of fitness in time
 # Input: pattern, white_time (extra time with no plot), ax, labels
 def plot_fitness(pattern, white_time, ax, mutation_times, labels):
@@ -770,6 +938,7 @@ def plot_fitness(pattern, white_time, ax, mutation_times, labels):
     times = np.linspace(pattern.time-pattern.env_prop.fitness_memory_time, pattern.time, num=fitness_num)
     index = round(pattern.time / pattern.env_prop.time_step) % fitness_num
     fitness = np.roll(pattern.fitness_tot, -(index+1),axis=1)
+    n_tot = np.roll(pattern.n_tot, -(index + 1), axis=1)
     # plot 0 axis
     ax.axhline(y=0, color='black')
     # draw current time line
@@ -944,7 +1113,7 @@ def plot_pip(env_prop, spec_prop, spec_fixed, d_fix, d_var, before_t, after_t, a
                 inv_exponents[diff_inv, diff_res] = find_invasion_exponent(pattern, spec_variable, inv_diff, after_t)
     colors = ["#4d4d4dff", "#ffffffff", "#d4aa00ff"]
     my_cmap = mcolors.LinearSegmentedColormap.from_list('my_cmp', colors)
-    im = ax.pcolormesh(diff_axis, diff_axis, inv_exponents, cmap=my_cmap, vmin=-1, vmax=1)
+    im = ax.pcolormesh(diff_axis, diff_axis, inv_exponents, cmap=my_cmap, vmin=-1, vmax=1, rasterized=True)
     # draw vertical lines for boundary of the pattern formation region
     if spec_variable == 0:
         critical_d = env_prop.int_fitness.critical_d0(d_fix)

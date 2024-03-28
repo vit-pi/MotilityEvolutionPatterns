@@ -13,14 +13,13 @@ import datetime
 ###
 # External: By varying the truth values of the parameters below, Movies 1-5 are reproduced.
 # Movie 1: distant_mutations=False, eco_forcing parameters=True, init_homog=False
-# Movie 2: distant_mutations=True, eco_forcing parameters=True, init_homog=False
-# Movie 3: distant_mutations=False, eco_forcing parameters=True, init_homog=True
+# Movie 2: distant_mutations=False, eco_forcing parameters=True, init_homog=True
+# Movie 3: distant_mutations=True, eco_forcing parameters=True, init_homog=False
 # Movie 4: distant_mutations=False, eco_forcing parameters=False, init_homog=False
-# Movie 5: distant_mutations=True, eco_forcing parameters=False, init_homog=False
 
 distant_mutations = False
 eco_forcing = False
-init_homog = False
+init_homog = True
 
 # Internal
 if eco_forcing:
@@ -35,7 +34,7 @@ if distant_mutations:
     title += "Large-Effect Mutations\n"
     filename += "LongMut_"
 else:
-    t_max = 4710
+    t_max = 8010
     plot_step = 10
     title += "Small-Effect Mutations\n"
     filename += "ShortMut_"
@@ -43,8 +42,8 @@ seed = 0
 if init_homog:
     t_max = 2010
     plot_step = 1
-    d0 = 1
-    d1 = 0.9
+    d0 = 0.5
+    d1 = 0.1
     filename += "InitHomog_"
 else:
     d0 = 0.1
@@ -69,21 +68,36 @@ else:
     ax_red.set_ylabel("defector motility $d_I$", labelpad=-7, color=colors[1])
 ax_fitness = fig.add_subplot(gs[1, 1])
 ax_fitness.set_xlabel("time t")
-ax_fitness.set_ylabel("total fitness $F_i$")
+ax_fitness.set_ylabel("$—$ total fitness $F_i$")
+ax_abundance = ax_fitness.twinx()
+ax_abundance.set_ylabel("$\\cdot\\cdot\\cdot$ species abundance")
 if eco_forcing:
-    if distant_mutations:
+    if distant_mutations and not init_homog:
         ax_fitness.set_ylim(-10, 5)
         ax_fitness.set_yticks([-10, -5, 0, 5])
+        ax_abundance.set_ylim(0, 30)
+        ax_abundance.set_yticks([0, 10, 20, 30])
     else:
         ax_fitness.set_ylim(-60, 60)
         ax_fitness.set_yticks([-60, -30, 0, 30, 60])
+        ax_abundance.set_ylim(0, 80)
+        ax_abundance.set_yticks([0, 20, 40, 60, 80])
 else:
-    if distant_mutations:
+    if distant_mutations and not init_homog:
         ax_fitness.set_ylim(-3, 1)
         ax_fitness.set_yticks([-3, -2, -1, 0, 1])
+        ax_abundance.set_ylim(0, 20)
+        ax_abundance.set_yticks([0, 5, 10, 15, 20])
+    elif init_homog:
+        ax_fitness.set_ylim(-10, 10)
+        ax_fitness.set_yticks([-10, -5, 0, 5, 10])
+        ax_abundance.set_ylim(0, 20)
+        ax_abundance.set_yticks([0, 5, 10, 15, 20])
     else:
         ax_fitness.set_ylim(-20, 5)
         ax_fitness.set_yticks([-20, -15, -10, -5, 0, 5])
+        ax_abundance.set_ylim(0, 20)
+        ax_abundance.set_yticks([0, 5, 10, 15, 20])
 sub_gs = gs[0, 1].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), wspace=0.05, hspace=0.05)
 ax_diffplane = fig.add_subplot(sub_gs[1, 0])
 ax_diffplane.set_xlabel("motility $d_A$", labelpad=-8, color=colors[0])
@@ -98,10 +112,10 @@ ax_diffred = fig.add_subplot(sub_gs[1, 1], sharey=ax_diffplane)
 env_prop = pt.EnvProp()
 if eco_forcing:
     env_prop.int_fitness = pt.IntFit1(2,0.62,0.5)
-    env_prop.pos_num = 176
+    env_prop.pos_num = 201
 else:
     env_prop.int_fitness = pt.IntFit2(2.4,8,1,1.2)
-    env_prop.pos_num = 121
+    env_prop.pos_num = 201
 env_prop.distant_mutations = distant_mutations
 env_prop.initialize()
 spec_prop = [pt.SpecProp(), pt.SpecProp()]
@@ -124,6 +138,8 @@ while pattern.time <= t_max:
         pt.plot_diffusivity_distribution(pattern, [ax_diffplane, ax_diffblue, ax_diffred], False)
         # Plot fitness
         pt.plot_fitness(pattern, white_time, ax_fitness, True, False)
+        # Plot total abundance
+        pt.plot_abundance(pattern, white_time, ax_abundance, False, False)
         # Format axes
         for i, ax in enumerate(fig.axes):
             ax.tick_params(axis='both', which='major', labelsize=10)
@@ -135,4 +151,6 @@ while pattern.time <= t_max:
         for i, ax in enumerate(fig.axes):
             for artist in ax.lines + ax.collections + ax.patches:
                 artist.remove()
+        for artist in ax_abundance.lines + ax_abundance.collections + ax_abundance.patches:
+            artist.remove()
     pattern.update_pattern_euler()
