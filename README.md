@@ -1,5 +1,5 @@
-# DispersalEvolutionPatterns
-This project provides the code to explore how the evolution of dispersal limits pattern formation [1]. It is instructive to firstly read [1], in order to understand this project. The code was written in Python.
+# MotilityEvolutionPatterns
+This project provides the code to explore how the evolution of motility limits pattern formation [1]. It is instructive to first read [1] to understand this project. The code was written in Python.
 
 ## Code structure
 ### Pattern.py
@@ -37,5 +37,5 @@ These files reproduce various panels of the respective Figure X in [1]. Most Fig
 4) Open the folder "Figure/Sketches" to find the new file Fig1_DiffPlane.svg.
 
 # References
-[1] V. Piskovsky, unpublished
+[1] V. Piskovsky, Evolution of predators and prey kills Turing patterns, 2024.
 
